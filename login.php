@@ -1,186 +1,157 @@
 <?php
+session_start();
 
-include "database.php";
+include('server.php');
+include 'master.php';
 
 ?>
 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Account-Star Store</title>
-  <link rel="stylesheet"  href="style.css">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,700;1,200&display=swap" rel="stylesheet"> 
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css">
-</head>
 <body>
 
-    <div class="container">
-     <div class="navbar"> 
+  <div class="container">
+    <div class="navbar">
       <div class="logo">
-       <a href="index.php"><img src="images/starstorelogo1.png" width="125"></a>
+        <a href="index.php"><img src="images/starstorelogo1.png" width="125"></a>
       </div>
       <nav>
-    	<ul id="menuItems">
-    		<li><a href="index.php">Home</a></li>
-    		<li><a href="products.php">Products</a></li>
-    		<li><a href="about.html">About</a></li>
-    		<li><a href="register.php">Register</a></li>
-    		<li><a href=""> Login</a>
-			  <div class="sub_menu">
-				  <ul>
-					  <li><a href="login.php">User-Login</a></li>
-					  <li><a href="admin.php">Admin-login</a></li>
-				  </ul>
-			  </div>
-			  </li>
-			
-    	</ul>
-    </nav>
-    <a href="login.php"><img src="images/cart3.png" width="30px" height="30px"></a>
-    <img src="images/menu.png" class="menu-icon" onclick="menutoggle()">
-  </div>
+        <ul id="menuItems">
+          <li><a href="index.php">Home</a></li>
+          <li><a href="products.php">Products</a></li>
+          <li><a href="about.php">About</a></li>
+
+          <?php if (!isset($_SESSION['username'])) : ?>
+            <li><a href="register.php">Register</a></li>
+
+            <li><a href=""> Login</a>
+              <div class="sub_menu">
+                <ul>
+                  <li><a href="login.php">User-Login</a></li>
+                  <li><a href="admin.php">Admin-login</a></li>
+                </ul>
+              </div>
+            </li>
+          <?php endif ?>
+
+        </ul>
+      </nav>
+      <?php if (isset($_SESSION['success'])) : ?>
+        <div class="error success">
+          <h3>
+            <?php
+            echo $_SESSION['success'];
+            unset($_SESSION['success']);
+            ?>
+          </h3>
+        </div>
+      <?php endif ?>
+
+      <!-- logged in user information -->
+      <?php if (isset($_SESSION['username'])) : ?>
+        <p> <a href="index.php?logout='1'" style="color: red; padding-right:50px;">logout</a> </p>
+
+        <a href="cart.php"><img src="images/cart3.png" width="30px" height="30px"></a>
+
+      <?php endif ?>
+
+      <img src="images/menu.png" class="menu-icon" onclick="menutoggle()">
+
     </div>
+  </div>
 
 
-<!------------------login page---------------->
-    
-    <div class="account-page">
-      <div class="container">
-        <div class="row">
-          <div class="col-2">
-            <img src="images/1.png" width="100%">
-          </div>
-          <div class="col-2">
-            <div class="form-container">
+  <!------------------login page---------------->
 
+  <div class="account-page">
+    <div class="container">
+      <div class="row">
+        <div class="col-2">
+          <img src="images/1.png" width="100%">
+        </div>
+        <div class="col-2">
+          <div class="form-container">
+
+            <?php
+            if (isset($_POST['submit'])) {
+              $count = 0;
+              $res = mysqli_query($db, "SELECT * FROM register WHERE username='$_POST[username]' && password= '$_POST[password]';");
+              $count = mysqli_num_rows($res);
+              if ($count == 0) {
+            ?>
+
+                <div><strong>The Username and Password doesn't match.</strong></div>
               <?php
-                if(isset($_POST['submit']))
-                {
-                     $count=0;
-                      $res=mysqli_query($db,"SELECT * FROM register WHERE username='$_POST[username]' && password= '$_POST[password]';");
-                     $count=mysqli_num_rows($res);
-                     if($count==0){
-                       ?>
-                      
-                       <div><strong>The Username and Password doesn't match.</strong></div>
-                       <?php
-                     }
-                     else{
-                       ?>
-                       <script type="text/javascript"> window.location="cart.php" </script>
-                       <?php
-                     }
-                }
-
+              } else {
               ?>
+                <script type="text/javascript">
+                  window.location = "cart.php"
+                </script>
+            <?php
+              }
+            }
 
-              
-               <div class="form-btn">
-                 
-                 <span onclick="login()">Login</span>
-                 
-               </div>
+            ?>
+            <div class="form-btn">
 
-              
-               <form id="LoginForm" action="" method="post">
-                 <input type="text" placeholder="Username" name="username" required>
-                 <input type="password" placeholder="password" name="password" required>
-                 <button type="submit" class="btn" name="submit">Login</button>
-                 <a href="">Forgot Password</a>
-               </form>
-
-              
-
+              <span onclick="login()">Login</span>
 
             </div>
+
+
+            <form action="" id="LoginForm" method="post">
+              <?php include('errors.php'); ?>
+              <input type="text" placeholder="Username" name="username">
+              <input type="password" placeholder="password" name="password">
+              <button type="submit" class="btn" name="login_user">Login</button>
+              <a href="">Forgot Password</a>
+            </form>
+
+
           </div>
         </div>
       </div>
     </div>
-    
-
-<!-----------------footer---------------------->
-<div class="footer">
-  <div class="container">
-    <div class="row">
-      <div class="footer-col-1">
-        <h3>Download Our App</h3>
-        <p>Download Apps for Android and IOS mobile phone.</p>
-        <div class="app-logo">
-          <img src="images/play-store0.png">
-          <img src="images/app-store.png">
-        </div>
-      </div>
-      <div class="footer-col-2">
-        <img src="images/starstorelogo1.png">
-        <p>Our purpose is to sustainably make the pleasure and benefits of sports accessible to the many.</p>
-      </div>
-      <div class="footer-col-3">
-        <h3>Useful links</h3>
-        <ul>
-          <li>Coupons</li>
-          <li>Blog post</li>
-          <li>Return Policy</li>
-          <li>Join Affiliate</li>
-        </ul>
-      </div>
-      <div class="footer-col-4">
-        <h3>Follow us</h3>
-        <ul>
-          <li>Facebook</li>
-          <li>Twitter</li>
-          <li>Instagram</li>
-          <li>YouTube</li>
-        </ul>
-      </div>
-    </div>
-    <hr>
-    <p class="copyright">Copyright 2021-Star Store</p>
   </div>
-</div>
-<!----------------------js for toggle menu--------------------->
 
-<script>
-  var menuItems=document.getElementById("menuItems");
-  menuItems.style.maxHeight="0px";
-  function menutoggle(){
 
-    if(menuItems.style.maxHeight=="0px"){
-      menuItems.style.maxHeight="200px";
+  <!-----------------footer---------------------->
+  <?php
+  include 'footer.php';
+  ?>
+  <!----------------------js for toggle menu--------------------->
+
+  <script>
+    var menuItems = document.getElementById("menuItems");
+    menuItems.style.maxHeight = "0px";
+
+    function menutoggle() {
+
+      if (menuItems.style.maxHeight == "0px") {
+        menuItems.style.maxHeight = "200px";
+      } else {
+        menuItems.style.maxHeight = "0px";
+      }
     }
-    else{
-            menuItems.style.maxHeight="0px";
+  </script>
+
+  <!----------------------js for toggle form--------------------->
+
+  <script>
+    var LoginForm = document.getElementById("LoginForm");
+    var RegForm = document.getElementById("RegForm");
+    var Indicator = document.getElementById("Indicator");
+
+
+    function register() {
+      RegForm.style.transform = "translateX(0px)";
+      LoginForm.style.transform = "translateX(0px)";
+      Indicator.style.transform = "translateX(100px)";
     }
-  }
 
-</script>
-
-<!----------------------js for toggle form--------------------->
-
-<script>
-  
-var LoginForm= document.getElementById("LoginForm");
-var RegForm= document.getElementById("RegForm");
-var Indicator= document.getElementById("Indicator");
-
-
-        function register(){
-          RegForm.style.transform = "translateX(0px)";
-          LoginForm.style.transform = "translateX(0px)";
-          Indicator.style.transform = "translateX(100px)";
-        }
-         function login(){
-          RegForm.style.transform = "translateX(300px)";
-          LoginForm.style.transform = "translateX(300px)";
-          Indicator.style.transform = "translateX(0px)";
-        }
-  
-
-</script>
+    function login() {
+      RegForm.style.transform = "translateX(300px)";
+      LoginForm.style.transform = "translateX(300px)";
+      Indicator.style.transform = "translateX(0px)";
+    }
+  </script>
 
 </body>
-</html>
