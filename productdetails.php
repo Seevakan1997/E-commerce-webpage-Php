@@ -102,14 +102,14 @@ include 'master.php';
             <h1><?php echo $row["name"];  ?></h1>
             <h4><?php echo $row["price"]; ?></h4>
             <select>
-              <option>Select Size</option>
+              <option disabled>Select Size</option>
               <option>XXL</option>
               <option>XL</option>
               <option>Large</option>
               <option>Medium</option>
               <option>Small</option>
             </select>
-            <input type="number" value="1">
+            <!-- <input type="number" value="1"> -->
             <button class="btn btn-info btn-block  " name="Add_To_Cart">Add to Cart</button>
 
             <h3>Product Details</h3>

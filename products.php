@@ -84,8 +84,8 @@ include 'master.php';
     <div id="message"></div>
     <div class="row row-2">
       <h2>All Products</h2>
-      <select>
-        <option>Default Shorting</option>
+      <select disabled>
+        <option>Filter</option>
         <option>Short by price</option>
         <option>Short by popularity</option>
         <option>Short by rating</option>
@@ -120,13 +120,13 @@ include 'master.php';
 
             <?php endif ?>
 
-            <div class="rating">
+            <!-- <div class="rating">
               <i class="fa fa-star" aria-hidden="true"></i>
               <i class="fa fa-star" aria-hidden="true"></i>
               <i class="fa fa-star" aria-hidden="true"></i>
               <i class="fa fa-star" aria-hidden="true"></i>
               <i class="fa fa-star-half" aria-hidden="true"></i>
-            </div>
+            </div> -->
 
           </div>
       <?php

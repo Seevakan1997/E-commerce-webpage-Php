@@ -110,7 +110,7 @@ include 'master.php';
 
                     <h1><?php echo $row["name"];  ?></h1>
                     <h4><?php echo $row["price"]; ?></h4>
-                    <select>
+                    <select disabled>
                         <option>Select Size</option>
                         <option>XXL</option>
                         <option>XL</option>
@@ -118,8 +118,24 @@ include 'master.php';
                         <option>Medium</option>
                         <option>Small</option>
                     </select>
-                    <input type="number" value="1">
-                    <button class="btn btn-info btn-block  " name="Add_To_Cart">Add to Cart</button>
+                    <!-- <input type="number" value="1"> -->
+                    <?php if (isset($_SESSION['username'])) : ?>
+
+                        <form action="cart.php" method="post">
+                            <input type="hidden" name="p_id" value="<?php echo $row["p2_id"]; ?>">
+                            <input type="hidden" name="name" value="<?php echo $row["name"]; ?>">
+                            <input type="hidden" name="price" value="<?php echo $row["price"]; ?>">
+                            <input type="hidden" name="image" value="<?php echo $row["image"]; ?>">
+                            <button class="btn btn-info btn-block" name="Add_To_Cart" style="width:30%;">Add to Cart</button>
+                        </form>
+
+                        <!-- <button class="btn btn-info btn-block" name="buy" style='background-color:#00D100;'>Buy</button> -->
+                    <?php else : ?>
+                        <button class="btn btn-info btn-block" name="Add_To_Cart" style='background-color:#6D6D6D;' disabled>Add to Cart</button>
+                        <!-- <button class="btn btn-info btn-block" name="buy" style=' background-color:#6D6D6D;' disabled>Buy</button> -->
+                    <?php endif; ?>
+
+
 
                     <h3>Product Details</h3>
                     <br>

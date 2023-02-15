@@ -112,7 +112,7 @@ include 'master.php';
 ";
                             }
                         } else {
-                            echo "<tr><td colspan='4'>No items in the cart</td></tr>";
+                            echo "<tr><td colspan='4'>No items in the purchase</td></tr>";
                         }
 
                         // Buy the item
