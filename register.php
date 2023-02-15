@@ -39,6 +39,7 @@ include 'master.php';
         <p> <a href="index.php?logout='1'" style="color: red; padding-right:50px;">logout</a> </p>
 
         <a href="cart.php"><img src="images/cart3.png" width="30px" height="30px"></a>
+        <a href="my_oders.php" style="width:30px; height:30px; padding-left:20px;"><i class="far fa-user-circle"></i></a>
 
       <?php endif ?>
 

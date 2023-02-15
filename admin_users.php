@@ -62,22 +62,59 @@ if (!isset($_SESSION['AdminLoginId'])) {
         </div>
 
     </div>
-
     <div class="small-container1">
 
-        <div class="box">
+        <div class="small-container cart-page">
+            <h3>All Registerd Users</h3>
 
-            <h1 class="home">Welcome Admin!</h1>
+            <table class="text-center">
+                <tbody class="text-center">
+                    <tr class="text-center">
+                        <th width="50%">Name</th>
+                        <th width="50%">Email</th>
+                    </tr>
+
+                    <?php
+
+
+                    // Connect to the database
+                    $db = mysqli_connect('localhost', 'root', '', 'webpage');
+
+                    $query = "SELECT * FROM register";
+                    $result = mysqli_query($db, $query);
+                    mysqli_error($db);
+                    // Check if there are any results
+                    if (mysqli_num_rows($result) > 0) {
+
+                        // Loop through the results and display them
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $user_id = $row['reg_id'];
+                            $name = $row['username'];
+                            $email = $row['gmail'];
+
+                            echo "
+<tr>
+<td>$name</td>
+<td>$email</td>
+</tr>
+";
+                        }
+                    } else {
+                        echo "<tr><td colspan='4'>No Users</td></tr>";
+                    }
+
+
+                    // Close the database connection
+                    mysqli_close($db);
+
+                    ?>
+
+                </tbody>
+
+            </table>
+
         </div>
-
-
     </div>
-
-    ?>
-
-
-
-
 
 
 

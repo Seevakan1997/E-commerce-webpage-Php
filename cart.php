@@ -1,64 +1,66 @@
 <?php
-
 $lifetime = 60 * 60 * 24 * 30;
 session_set_cookie_params($lifetime);
 session_start();
 include('server.php');
 
-
 if (isset($_GET['logout'])) {
-  // session_destroy();
   header("Location: login.php");
   exit;
 }
+
 if ($_SERVER['PHP_SELF'] !== '/cart.php' && !isset($_SESSION['reg_id'])) {
   header('Location: login.php');
   exit;
 }
 
 include 'master.php';
+
 if (isset($_POST['Add_To_Cart'])) {
   if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = array();
   }
-  $value = array(
-    'pname' => $_POST['name'],
-    'pprice' => $_POST['price'],
-    'pid' => $_POST['p_id'],
-    'quantity' => 1
-  );
-  array_push($_SESSION['cart'], $value);
-
 
   $product_id = $_POST['p_id'];
+  $name = $_POST['name'];
+  $price = $_POST['price'];
   $quantity = 1;
 
   // Get user ID from the session
   $user_id = (int) $_SESSION['userID'];
+
   if (isset($user_id) && is_numeric($user_id)) {
-    // Insert the product into the user's cart
-    // ...
+    // Check if the product is already in the cart for the current user
+    $query = "SELECT * FROM user_cart WHERE product_id = '$product_id' AND user_id = '$user_id'";
+    $result = mysqli_query($db, $query);
+    $row = mysqli_fetch_array($result);
+
+    if ($row) {
+      // If the product is already in the cart, update the quantity
+      $new_quantity = $row['quantity'] + $quantity;
+      $update_query = "UPDATE user_cart SET quantity = '$new_quantity' WHERE product_id = '$product_id' AND user_id = '$user_id'";
+      mysqli_query($db, $update_query);
+    } else {
+      // If the product is not in the cart, add it
+      $insert_query = "INSERT INTO user_cart (user_id, product_id, quantity) VALUES ('$user_id', '$product_id', '$quantity')";
+      mysqli_query($db, $insert_query);
+    }
   } else {
     echo "Error: user_id is not set or is not a valid integer.";
   }
-  // Check if the product is already in the cart for the current user
-  $query = "SELECT * FROM user_cart WHERE product_id = '$product_id' AND user_id = '$user_id'";
-  $result = mysqli_query($db, $query);
-  $row = mysqli_fetch_array($result);
 
-  if ($row) {
-    // If the product is already in the cart, update the quantity
-    $new_quantity = $row['quantity'] + $quantity;
-    $update_query = "UPDATE user_cart SET quantity = '$new_quantity' WHERE product_id = '$product_id' AND user_id = '$user_id'";
-    mysqli_query($db, $update_query);
-  } else {
-    // If the product is not in the cart, add it
-    $insert_query = "INSERT INTO user_cart (user_id, product_id, quantity) VALUES ('$user_id', '$product_id', '$quantity')";
-    mysqli_query($db, $insert_query);
-  }
+  // Add product to session cart array
+  $value = array(
+    'pname' => $name,
+    'pprice' => $price,
+    'pid' => $product_id,
+    'quantity' => $quantity
+  );
+  array_push($_SESSION['cart'], $value);
 }
-// header('Location: products.php');
+
 ?>
+
 
 
 <body>
@@ -105,6 +107,7 @@ if (isset($_POST['Add_To_Cart'])) {
         <p> <a href="index.php?logout='1'" style="color: red; padding-right:50px;">logout</a> </p>
 
         <a href="cart.php"><img src="images/cart3.png" width="30px" height="30px"></a>
+        <a href="my_oders.php" style="width:30px; height:30px; padding-left:20px;"><i class="far fa-user-circle"></i></a>
 
       <?php endif ?>
 

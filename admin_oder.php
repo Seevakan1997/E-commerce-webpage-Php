@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 include('server.php');
 
@@ -53,7 +54,7 @@ if (!isset($_SESSION['AdminLoginId'])) {
       <ul>
         <li><a href="admin_home.php"><i class="fas fa-home"> Home</i></a></li>
         <li><a href="admin_product.php"><i class="fa fa-archive"></i> Products</a></li>
-        <li><a href="#section3"><i class="fas fa-user"> Users</i></a></li>
+        <li><a href="admin_users.php"><i class="fas fa-user"> Users</i></a></li>
         <li><a href="admin_oder.php"><i class="fa fa-cart-arrow-down"></i> Oders</a></li>
         <li><a href="#section5"><i class="fas fa-info"> About</i></a></li>
         <li><a href="#section6"><i class="fas fa-blog"> Blogs</i></a></li>
@@ -61,68 +62,120 @@ if (!isset($_SESSION['AdminLoginId'])) {
     </div>
 
   </div>
+  <div class="small-container1">
 
-  <<div class="small-container cart-page">
+    <div class="small-container cart-page">
+      <h3>Oders</h3>
 
-    <table class="text-center">
-      <tbody class="text-center">
-        <tr class="text-center">
-          <th width="40%">Item</th>
-          <th width="20%">Price</th>
-          <th width="10%">Quantity</th>
+      <table class="text-center">
+        <tbody class="text-center">
+          <tr class="text-center">
+            <th width="20%">User</th>
+            <th width="40%">Item</th>
+            <th width="20%">Price</th>
+            <th width="10%">Quantity</th>
+            <th width="10%">Action</th>
 
 
-        </tr>
-        <?php
-        $total = 0;
-        if (isset($_SESSION['cart'])) {
-          foreach ($_SESSION['cart'] as $key => $value) {
-            $total = $total + $value['pprice'];
-            echo "
-          <tr>
-            <td>$value[pname]</td>
-            <td>$$value[pprice]</td>
-            <td><input class='text-center' type='number' value='1'></td>
-          
-            <td>
-            <form action='action.php' method='POST'>
-          
-            <input type='hidden' name='pname' value='$value[pname]'>
-            </form>
-            </td>
           </tr>
-        ";
+          <?php
+
+
+          // Connect to the database
+          $db = mysqli_connect('localhost', 'root', '', 'webpage');
+
+          if (isset($_POST['remove_oder'])) {
+            // Get the product id to be removed
+            $product_id = $_POST['product_id'];
+
+
+            // Remove the item from the database
+            $query = "DELETE FROM oders WHERE product_id = $product_id";
+            $result = mysqli_query($db, $query);
+
+            if ($result) {
+              // Redirect the user back to the cart page
+              header("Location: admin_oder.php");
+              exit;
+            } else {
+              echo "Error removing item from cart";
+            }
           }
-        }
-        ?>
-
-
-      </tbody>
-
-    </table>
 
 
 
+          // Get the details of the products added to the cart by the current user
+          $query = "SELECT o.user_id, o.product_id, o.name, u.username, o.price, o.quantity FROM oders o JOIN register u ON o.user_id = u.reg_id";
+          $result = mysqli_query($db, $query);
+          mysqli_error($db);
+          // Check if there are any results
+          if (mysqli_num_rows($result) > 0) {
+
+            // Loop through the results and display them
+            while ($row = mysqli_fetch_assoc($result)) {
+              $user_id = $row['user_id'];
+              $product_id = $row['product_id'];
+              $username = $row['username'];
+              $name = $row['name'];
+              $price = $row['price'];
+              $quantity = $row['quantity'];
+
+              echo "
+<tr>
+<td>$username</td>
+<td>$name</td>
+<td>$$price</td>
+<td>$quantity</td>
+<td>
+<form action='admin_oder.php' method='POST'>
+<input type='hidden' name='product_id' value='$product_id'>
+<input type='hidden' name='name' value='$name'>
+<input type='hidden' name='price' value='$price'>
+<input type='hidden' name='quantity' value='$quantity'>
+<button name='accept_oder' class='btn btn-info btn-outline-danger' style='background-color:#00D100;'>Accept</button>
+<button name='remove_oder' class='btn btn-info btn-outline-danger' onclick='return confirm(\"Are you sure you want to remove this item from orders?\");'>Remove</button>
+</form>
+</td>
+</tr>
+";
+            }
+          } else {
+            echo "<tr><td colspan='4'>No Orders</td></tr>";
+          }
+
+          // Close the database connection
+          mysqli_close($db);
+
+          ?>
+
+
+        </tbody>
+
+      </table>
+
+    </div>
+  </div>
 
 
 
 
 
-    <!----------------------js for toggle menu--------------------->
 
-    <script>
-      var menuItems = document.getElementById("menuItems");
-      menuItems.style.maxHeight = "0px";
+  <!----------------------js for toggle menu--------------------->
 
-      function menutoggle() {
+  <script>
+    var menuItems = document.getElementById("menuItems");
+    menuItems.style.maxHeight = "0px";
 
-        if (menuItems.style.maxHeight == "0px") {
-          menuItems.style.maxHeight = "200px";
-        } else {
-          menuItems.style.maxHeight = "0px";
-        }
+    function menutoggle() {
+
+      if (menuItems.style.maxHeight == "0px") {
+        menuItems.style.maxHeight = "200px";
+      } else {
+        menuItems.style.maxHeight = "0px";
       }
-    </script>
+    }
+  </script>
 
 </body>
 

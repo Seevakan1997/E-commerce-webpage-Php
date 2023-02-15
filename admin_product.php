@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 include('server.php');
 
@@ -53,7 +54,7 @@ if (!isset($_SESSION['AdminLoginId'])) {
             <ul>
                 <li><a href="admin_home.php"><i class="fas fa-home"> Home</i></a></li>
                 <li><a href="admin_product.php"><i class="fa fa-archive"></i> Products</a></li>
-                <li><a href="#section3"><i class="fas fa-user"> Users</i></a></li>
+                <li><a href="admin_users.php"><i class="fas fa-user"> Users</i></a></li>
                 <li><a href="admin_oder.php"><i class="fa fa-cart-arrow-down"></i> Oders</a></li>
                 <li><a href="#section5"><i class="fas fa-info"> About</i></a></li>
                 <li><a href="#section6"><i class="fas fa-blog"> Blogs</i></a></li>
@@ -67,7 +68,50 @@ if (!isset($_SESSION['AdminLoginId'])) {
         <div class="box">
 
             <div class="block">
+                <?php
+                if (isset($_FILES['pimage'])) {
+                    $errors = array();
+                    $file_name = $_FILES['pimage']['name'];
+                    $file_size = $_FILES['pimage']['size'];
+                    $file_tmp = $_FILES['pimage']['tmp_name'];
+                    $file_type = $_FILES['pimage']['type'];
+                    $file_ext_array = explode('.', $_FILES['pimage']['name']);
+                    if (!empty($file_ext_array)) {
+                        $file_ext = strtolower(end($file_ext_array));
+                    } else {
+                        // Handle the error case, for example by setting the $file_ext to an empty string
+                        $file_ext = '';
+                    }
 
+
+                    $extensions = array("jpeg", "jpg", "png");
+
+                    if (in_array($file_ext, $extensions) === false) {
+                        $errors[] = "extension not allowed, please choose a JPEG or PNG file.";
+                    }
+
+                    if ($file_size > 2097152) {
+                        $errors[] = 'File size must be excately 2 MB';
+                    }
+
+                    if (empty($errors) == true) {
+                        $file_path = "images/" . $file_name;
+                        move_uploaded_file($file_tmp, $file_path);
+
+                        // Insert data into database
+                        $sql = "INSERT INTO latest_product (image, name, price, details) VALUES ('{$file_path}','{$_POST["pname"]}','{$_POST["pprice"]}','{$_POST["pdetails"]}')";
+                        $db->query($sql);
+                        echo "<script> alert('Upload Successfully') </script>";
+                    }
+                }
+
+                // if (isset($_POST['submit'])) {
+                //     $sql = "INSERT INTO latest_product(image,name,price,details) values('{$_POST["pimage"]}','{$_POST["pname"]}','{$_POST["pprice"]}','{$_POST["pdetails"]}')";
+                //     $db->query($sql);
+                //     echo "<script> alert('Upload Successfully') </script>";
+                // }
+
+                ?>
                 <form name="forml" action="" method="POST" enctype="multipart/form-data">
                     <h2>Add Product</h2>
                     <table>
@@ -93,56 +137,91 @@ if (!isset($_SESSION['AdminLoginId'])) {
                 </form>
             </div>
         </div>
+        <div class="small-container cart-page">
+
+            <table class="text-center">
+                <tbody class="text-center">
+                    <tr class="text-center">
+                        <th width="40%">Item</th>
+                        <th width="20%">Price</th>
+                        <th width="10%">Quantity</th>
+                        <th width="10%">Action</th>
+                    </tr>
 
 
-    </div>
-    <?php
-    if (isset($_FILES['pimage'])) {
-        $errors = array();
-        $file_name = $_FILES['pimage']['name'];
-        $file_size = $_FILES['pimage']['size'];
-        $file_tmp = $_FILES['pimage']['tmp_name'];
-        $file_type = $_FILES['pimage']['type'];
-        $file_ext_array = explode('.', $_FILES['pimage']['name']);
-        if (!empty($file_ext_array)) {
-            $file_ext = strtolower(end($file_ext_array));
-        } else {
-            // Handle the error case, for example by setting the $file_ext to an empty string
-            $file_ext = '';
-        }
+                    <?php
 
 
-        $extensions = array("jpeg", "jpg", "png");
+                    // Connect to the database
+                    $db = mysqli_connect('localhost', 'root', '', 'webpage');
 
-        if (in_array($file_ext, $extensions) === false) {
-            $errors[] = "extension not allowed, please choose a JPEG or PNG file.";
-        }
+                    if (isset($_POST['remove_product'])) {
+                        // Get the product id to be removed
+                        $product_id = $_POST['product_id'];
 
-        if ($file_size > 2097152) {
-            $errors[] = 'File size must be excately 2 MB';
-        }
 
-        if (empty($errors) == true) {
-            $file_path = "images/" . $file_name;
-            move_uploaded_file($file_tmp, $file_path);
+                        // Remove the item from the database
+                        $query = "DELETE FROM latest_product WHERE p2_id = $product_id";
+                        $result = mysqli_query($db, $query);
 
-            // Insert data into database
-            $sql = "INSERT INTO latest_product (image, name, price, details) VALUES ('{$file_path}','{$_POST["pname"]}','{$_POST["pprice"]}','{$_POST["pdetails"]}')";
-            $db->query($sql);
-            echo "<script> alert('Upload Successfully') </script>";
-        }
-    }
-
-    // if (isset($_POST['submit'])) {
-    //     $sql = "INSERT INTO latest_product(image,name,price,details) values('{$_POST["pimage"]}','{$_POST["pname"]}','{$_POST["pprice"]}','{$_POST["pdetails"]}')";
-    //     $db->query($sql);
-    //     echo "<script> alert('Upload Successfully') </script>";
-    // }
-
-    ?>
+                        if ($result) {
+                            // Redirect the user back to the cart page
+                            header("Location: admin_product.php");
+                            exit;
+                        } else {
+                            echo "Error removing item from cart";
+                        }
+                    }
 
 
 
+                    // Get the details of the products added to the cart by the current user
+                    $query = "SELECT * FROM latest_product";
+                    $result = mysqli_query($db, $query);
+                    mysqli_error($db);
+                    // Check if there are any results
+                    if (mysqli_num_rows($result) > 0) {
+
+                        // Loop through the results and display them
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $product_id = $row['p2_id'];
+                            $name = $row['name'];
+                            $price = $row['price'];
+                            $quantity = $row['details'];
+
+                            echo "
+<tr>
+<td>$name</td>
+<td>$$price</td>
+<td>$quantity</td>
+<td>
+<form action='admin_product.php' method='POST'>
+<input type='hidden' name='product_id' value='$product_id'>
+<input type='hidden' name='name' value='$name'>
+<input type='hidden' name='price' value='$price'>
+<input type='hidden' name='quantity' value='$quantity'>
+<button name='edit_product' class='btn btn-info btn-outline-danger' style='background-color:#00D100;'>Edit</button>
+<button name='remove_product' class='btn btn-info btn-outline-danger' onclick='return confirm(\"Are you sure you want to remove this item from products?\");'>Remove</button>
+</form>
+</td>
+</tr>
+";
+                        }
+                    } else {
+                        echo "<tr><td colspan='4'>No Products</td></tr>";
+                    }
+
+
+                    // Close the database connection
+                    mysqli_close($db);
+
+                    ?>
+
+                </tbody>
+
+            </table>
+
+        </div>
 
 
 
@@ -150,21 +229,25 @@ if (!isset($_SESSION['AdminLoginId'])) {
 
 
 
-    <!----------------------js for toggle menu--------------------->
 
-    <script>
-        var menuItems = document.getElementById("menuItems");
-        menuItems.style.maxHeight = "0px";
 
-        function menutoggle() {
 
-            if (menuItems.style.maxHeight == "0px") {
-                menuItems.style.maxHeight = "200px";
-            } else {
-                menuItems.style.maxHeight = "0px";
+
+        <!----------------------js for toggle menu--------------------->
+
+        <script>
+            var menuItems = document.getElementById("menuItems");
+            menuItems.style.maxHeight = "0px";
+
+            function menutoggle() {
+
+                if (menuItems.style.maxHeight == "0px") {
+                    menuItems.style.maxHeight = "200px";
+                } else {
+                    menuItems.style.maxHeight = "0px";
+                }
             }
-        }
-    </script>
+        </script>
 
 </body>
 

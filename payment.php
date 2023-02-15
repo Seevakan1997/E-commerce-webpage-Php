@@ -1,29 +1,16 @@
 <?php
-
-$lifetime = 60 * 60 * 24 * 30;
-session_set_cookie_params($lifetime);
 session_start();
+
 include('server.php');
-
-
-if (isset($_GET['logout'])) {
-    // session_destroy();
-    header("Location: login.php");
-    exit;
-}
-
-
 include 'master.php';
 
-
-// Get the product ID, name, price, and quantity from the URL
+// Get the form data
 $product_id = $_GET['product_id'];
 $name = $_GET['name'];
 $price = $_GET['price'];
 $quantity = $_GET['quantity'];
 
-// Use the product details as needed on the payment page
-// echo "You are buying $quantity of $name at $$price each.";
+
 
 ?>
 
@@ -70,6 +57,7 @@ $quantity = $_GET['quantity'];
                 <p> <a href="index.php?logout='1'" style="color: red; padding-right:50px;">logout</a> </p>
 
                 <a href="cart.php"><img src="images/cart3.png" width="30px" height="30px"></a>
+                <a href="my_oders.php" style="width:30px; height:30px; padding-left:20px;"><i class="far fa-user-circle"></i></a>
 
             <?php endif ?>
 
@@ -86,26 +74,32 @@ $quantity = $_GET['quantity'];
         </div>
         <br>
         <h2 class="text-center">Payment Page</h2>
-        <form action="#">
+        <form action="payment_process.php" method="post">
             <div class="form-group">
                 <label for="cardNumber">Card Number</label>
-                <input type="text" class="form-control" id="cardNumber" placeholder="Enter your card number" />
+                <input type="text" class="form-control" id="cardNumber" name="card_number" placeholder="Enter your card number" required />
             </div>
             <div class="form-group">
                 <label for="cardHolder">Card Holder</label>
-                <input type="text" class="form-control" id="cardHolder" placeholder="Enter the name on the card" />
+                <input type="text" class="form-control" id="cardHolder" name="card_holder" placeholder="Enter the name on the card" required />
             </div>
             <div class="form-group">
                 <label for="expiryDate">Expiry Date</label>
-                <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY" />
+                <input type="text" class="form-control" id="expiryDate" name="expiry_date" placeholder="MM/YY" required />
             </div>
             <div class="form-group">
                 <label for="cvv">CVV</label>
-                <input type="text" class="form-control" id="cvv" placeholder="CVV" />
+                <input type="text" class="form-control" id="cvv" name="cvv" placeholder="CVV" required />
             </div>
+            <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
+            <input type="hidden" name="name" value="<?php echo $name; ?>">
+            <input type="hidden" name="price" value="<?php echo $price; ?>">
+            <input type="hidden" name="quantity" value="<?php echo $quantity; ?>">
+            <input type="hidden" name="purchase_complete" value="true">
             <button type="submit" class="btn btn-primary center-block">
                 Buy
             </button>
         </form>
+
     </div>
 </body>

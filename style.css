@@ -9,6 +9,10 @@ body{
 	font-family: 'Poppins', sans-serif;
 }
 
+#myDropdown {
+	display: none;
+  }
+  
 .navbar{
 	display: flex;
 	align-items: center;
